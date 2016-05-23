@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.3//EN" "http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+
+    <!-- 指定由spring负责action对象的创建 -->
+    <constant name="struts.objectFactory" value="spring" />
+    <!-- 该属性指定需要Struts2处理的请求后缀，该属性的默认值是action，即所有匹配*.action的请求都由Struts2处理。 如果用户需要指定多个请求后缀，则多个后缀之间以英文逗号（,）隔开。 -->
+    <constant name="struts.action.extension" value="action" />
+    <!-- 是否启用开发模式(开发模式下设为true，这样可以打印出更详细的错误信息)[发布时:false] -->
+    <constant name="struts.devMode" value="true" />
+    <!-- struts配置文件改动后，是否重新加载(开发阶段最好true)[发布时:false] -->
+    <constant name="struts.configuration.xml.reload" value="true" />
+    <!-- 设置浏览器是否缓存静态内容(开发阶段最好false)[发布时:true] -->
+    <constant name="struts.serve.static.browserCache" value="false" />
+    <!--解决乱码 -->
+    <constant name="struts.i18n.encoding" value="UTF-8" />
+    <!-- 每次HTTP请求系统都重新加载资源文件[发布时:false] -->
+    <constant name="struts.i18n.reload" value="true" />
+    <!-- 文件上传最大值 -->
+    <constant name="struts.multipart.maxSize" value="104857600" />
+    <!-- 让struts2支持动态方法调用 [发布时:false]-->
+    <constant name="struts.enable.DynamicMethodInvocation" value="false" />
+    <!-- Action名称中是否还是用斜线 -->
+    <constant name="struts.enable.SlashesInActionNames" value="false" />
+    <!-- 允许标签中使用表达式语法 -->
+    <constant name="struts.tag.altSyntax" value="true" />
+    <!-- 对于WebLogic,Orion,OC4J此属性应该设置成true -->
+    <constant name="struts.dispatcher.parametersWorkaround" value="false" />
+    <!-- 注解扫描的包结尾名 -->
+    <constant name="struts.convention.package.locators" value="action" />
+
+    <package name="ssh" extends="struts-default">
+        <!-- 拦截器配置 -->
+        <interceptors>
+            <interceptor name="userInterceptor" class="cn.rookie.action.UserInterceptor">
+            </interceptor>
+            <interceptor-stack name="myStack">
+                <interceptor-ref name="defaultStack"></interceptor-ref>
+                <interceptor-ref name="userInterceptor"></interceptor-ref>
+            </interceptor-stack>
+        </interceptors>
+        <!-- 执行指定的拦截器 -->
+        <default-interceptor-ref name="myStack"></default-interceptor-ref>
+
+        <global-results>
+            <result name="exception">/exception/exception.jsp</result>
+            <result name="success">index.jsp</result>
+            <result name="login" type="redirect">/login.jsp</result>
+        </global-results>
+
+        <global-exception-mappings>
+            <exception-mapping result="exception" exception="java.sql.SQLException" />
+            <exception-mapping result="exception" exception="java.io.IOException" />
+            <exception-mapping result="exception"
+                               exception="java.lang.ClassCastException" />
+            <exception-mapping result="exception"
+                               exception="java.lang.ArrayIndexOutOfBoundsException" />
+            <exception-mapping result="exception"
+                               exception="java.lang.NullPointerException" />
+            <exception-mapping result="exception"
+                               exception="java.lang.NoSuchMethodException" />
+            <exception-mapping result="exception" exception="java.lang.Exception" />
+        </global-exception-mappings>
+
+        <!-- Action实例交给Spring创建 -->
+        <action name="emp_*" class="employeeAction" method="{1}">
+            <!-- 列表展示 -->
+            <result name="list">/WEB-INF/list.jsp</result>
+
+            <!-- 进入添加页面视图 -->
+            <result name="add">/WEB-INF/add.jsp</result>
+
+            <!-- 添加成功，进入列表（防止刷新就多一条记录问题，所以用重定向） -->
+            <result name="listAction" type="redirectAction">emp_list</result>
+
+            <!-- 进入修改页面 -->
+            <result name="edit">/WEB-INF/edit.jsp</result>
+        </action>
+        <action name="admin_*" class="cn.rookie.action.AdminAction" method="{1}">
+            <result name="loginFailed">/login.jsp</result>
+            <result name="index" type="redirectAction">emp_list</result>
+        </action>
+    </package>
+</struts>
